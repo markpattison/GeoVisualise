@@ -1,13 +1,16 @@
+float4x4 xWorld;
+float4x4 xView;
+float4x4 xProjection;
+
 struct VertexShaderInput
 {
     float4 Position	: SV_POSITION;
-    float4 Colour   : COLOR0;
 };
 
 struct VertexToPixel
 {
 	float4 Position : SV_POSITION;
-	float4 Colour   : COLOR0;
+	float Height : COLOR0;
 };
 
 struct PixelToFrame
@@ -17,10 +20,13 @@ struct PixelToFrame
 
 VertexToPixel ColouredVS(VertexShaderInput input)
 {
+	float4x4 preViewProjection = mul(xView, xProjection);
+	float4x4 preWorldViewProjection = mul(xWorld, preViewProjection);
+
 	VertexToPixel output;
 
-	output.Position = input.Position;
-	output.Colour = input.Colour;
+	output.Position = mul(input.Position, preWorldViewProjection);
+	output.Height = clamp((input.Position.y - 50.0) / 150.0, 0.0, 1.0);
 
 	return output;
 }
@@ -29,7 +35,7 @@ PixelToFrame ColouredPS(VertexToPixel input)
 {
 	PixelToFrame output;
 
-	output.Colour = input.Colour;
+	output.Colour = float4(input.Height, 1.0, input.Height, 1.0);
 
 	return output;
 }

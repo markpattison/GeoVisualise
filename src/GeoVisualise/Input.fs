@@ -31,6 +31,14 @@ type Input(keyboardState: KeyboardState,
     member _this.MouseY = mouseY
     member _this.MouseDX = mouseDX
     member _this.MouseDY = mouseDY
+
+    member _this.Up = keyboardState.IsKeyDown(Keys.Up)
+    member _this.Down = keyboardState.IsKeyDown(Keys.Down)
+    member _this.Left = keyboardState.IsKeyDown(Keys.Left)
+    member _this.Right = keyboardState.IsKeyDown(Keys.Right)
+    member _this.PageUp = keyboardState.IsKeyDown(Keys.PageUp)
+    member _this.PageDown = keyboardState.IsKeyDown(Keys.PageDown)
+
     member _this.IsPressed(key) = keyboardState.IsKeyDown(key)
     member _this.JustPressed(key) = justPressed(key)
 

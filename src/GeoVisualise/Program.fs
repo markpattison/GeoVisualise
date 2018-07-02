@@ -12,7 +12,7 @@ type Program() as _this =
     let mutable gameContent = Unchecked.defaultof<Sample.Content>
     let mutable gameState = Unchecked.defaultof<Sample.State>
 
-    let resetMouseEachFrame = DoNotReset
+    let resetMouseEachFrame = Reset
 
     let graphics = new GraphicsDeviceManager(_this)
     do graphics.GraphicsProfile <- GraphicsProfile.HiDef
@@ -34,12 +34,14 @@ type Program() as _this =
         input <- Input(Keyboard.GetState(), Keyboard.GetState(), Mouse.GetState(), Mouse.GetState(), _this.Window, Mouse.GetState(), 0, 0, resetMouseEachFrame)
 
         gameContent <- Sample.loadContent _this device graphics
-        gameState <- Sample.initialState
+        gameState <- Sample.initialState gameContent
     
     override _this.Update(gameTime) =
         input <- input.Updated(Keyboard.GetState(), Mouse.GetState(), _this.Window)
 
         gameState <- Sample.update input gameContent gameTime gameState
+
+        if gameState.Exiting then _this.Exit()
 
         do base.Update(gameTime)
     
