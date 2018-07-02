@@ -25,6 +25,8 @@ type Content =
 
         World: Matrix
         Projection: Matrix
+
+        LightDirection: Vector3
     }
 
 let loadContent (_this: Game) device (graphics: GraphicsDeviceManager) =
@@ -49,6 +51,8 @@ let loadContent (_this: Game) device (graphics: GraphicsDeviceManager) =
 
         World = Matrix.Identity
         Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, device.Viewport.AspectRatio, 1.0f, 10000.0f)
+
+        LightDirection = Vector3.Normalize(Vector3(-1.0f, 0.0f, -1.0f))
     }
 
 type State =
@@ -88,6 +92,7 @@ let draw (device: GraphicsDevice) gameContent gameState (gameTime: GameTime) =
     gameContent.Effect.Parameters.["xWorld"].SetValue(gameContent.World)
     gameContent.Effect.Parameters.["xView"].SetValue(gameState.Camera.ViewMatrix)
     gameContent.Effect.Parameters.["xProjection"].SetValue(gameContent.Projection)
+    gameContent.Effect.Parameters.["xLightDirection"].SetValue(gameContent.LightDirection)
 
     gameContent.Effect.CurrentTechnique.Passes |> Seq.iter
         (fun pass ->

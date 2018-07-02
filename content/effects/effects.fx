@@ -1,6 +1,7 @@
 float4x4 xWorld;
 float4x4 xView;
 float4x4 xProjection;
+float3 xLightDirection;
 
 struct VertexShaderInput
 {
