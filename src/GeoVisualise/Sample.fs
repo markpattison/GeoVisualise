@@ -16,7 +16,7 @@ type Content =
         Effect: Effect
         AspectRatio: single
 
-        Vertices: VertexPosition []
+        Vertices: VertexPositionNormalTexture []
         Indices: int []
         MinX: single
         MaxX: single
