@@ -7,29 +7,30 @@ open Input
 let maxLookUpDown = 1.5f;
 let rotSpeed = 0.00005f;            // per millisecond
 let moveSpeed = 0.02f;
-let upDirection = Vector3(0.0f, 1.0f, 0.0f)
+let upDirection = Vector3(0.0f, 0.0f, 1.0f)
 
 // members
 type FreeCamera(position: Vector3,
                 lookAroundX: single,
-                lookAroundY: single) =
-    let rotY = Matrix.CreateRotationY(-lookAroundY)
+                lookAroundZ: single) =
+    let rotZ = Matrix.CreateRotationZ(-lookAroundZ)
     let lookDirection = 
             let rot1 = Matrix.CreateRotationX(-lookAroundX)
-            let combined = Matrix.Multiply(rot1, rotY)
-            let temp2 = Vector3.Transform(Vector3.Backward, combined)
+            let combined = Matrix.Multiply(rot1, rotZ)
+            let temp2 = Vector3.Transform(Vector3.UnitY, combined)
             temp2.Normalize()
             temp2
     let rightDirection =
-            let temp2 = Vector3.Transform(Vector3.Left, rotY)
+            let temp2 = Vector3.Transform(Vector3.UnitX, rotZ)
             temp2.Normalize()
             temp2
     let lookAt = position + lookDirection
     member _this.ViewMatrix = Matrix.CreateLookAt(position, lookAt, upDirection)
     member _this.Position = position
     member _this.LookAroundX = lookAroundX
-    member _this.LookAroundY = lookAroundY
+    member _this.LookAroundY = lookAroundZ
     member _this.LookAt = lookAt
+    member _this.LookDirection = lookDirection
     member _this.RightDirection = rightDirection
     member _this.Updated(input : Input, t) =
         let mutable newPosition = position
@@ -39,6 +40,6 @@ type FreeCamera(position: Vector3,
         if input.Down then newPosition <- newPosition - upDirection
         if input.Forward then newPosition <- newPosition + lookDirection
         if input.Backward then newPosition <- newPosition - lookDirection
-        let newLookAroundY = lookAroundY + rotSpeed * t * single input.MouseDX
+        let newLookAroundZ = lookAroundZ + rotSpeed * t * single input.MouseDX
         let newLookAroundX = MathHelper.Clamp(lookAroundX + rotSpeed * t * single input.MouseDY, -maxLookUpDown, maxLookUpDown)
-        FreeCamera(newPosition, newLookAroundX, newLookAroundY)
+        FreeCamera(newPosition, newLookAroundX, newLookAroundZ)

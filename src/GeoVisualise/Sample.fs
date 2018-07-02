@@ -20,8 +20,8 @@ type Content =
         Indices: int []
         MinX: single
         MaxX: single
-        MinZ: single
-        MaxZ: single
+        MinY: single
+        MaxY: single
 
         World: Matrix
         Projection: Matrix
@@ -32,7 +32,7 @@ type Content =
 let loadContent (_this: Game) device (graphics: GraphicsDeviceManager) =
     let ascStream = new StreamReader(@"data\TL11\TL11.asc")
     let data = readAsc ascStream
-    let vertices, minX, maxX, minZ, maxZ = ConvertToVertices.convert data
+    let vertices, minX, maxX, minY, maxY = ConvertToVertices.convert data
     let indices = ConvertToVertices.indices data.NumCols data.NumRows
 
     {
@@ -46,13 +46,13 @@ let loadContent (_this: Game) device (graphics: GraphicsDeviceManager) =
 
         MinX = minX
         MaxX = maxX
-        MinZ = minZ
-        MaxZ = maxZ
+        MinY = minY
+        MaxY = maxY
 
         World = Matrix.Identity
         Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, device.Viewport.AspectRatio, 1.0f, 10000.0f)
 
-        LightDirection = Vector3.Normalize(Vector3(-1.0f, 0.0f, -1.0f))
+        LightDirection = Vector3.Normalize(Vector3(-1.0f, 0.0f, -0.5f))
     }
 
 type State =
@@ -63,7 +63,7 @@ type State =
     }
 
 let initialState content =
-    let startingPosition = Vector3(0.5f * (content.MinX + content.MaxX), 500.0f, 0.5f * (content.MinZ + content.MaxZ))
+    let startingPosition = Vector3(0.5f * (content.MinX + content.MaxX), 0.5f * (content.MinY + content.MaxY), 5000.0f)
     { ShowParameters = false; Exiting = false; Camera = FreeCamera(startingPosition, 0.0f, 0.0f) }
 
 let update (input: Input) gameContent (gameTime: GameTime) gameState =
@@ -75,11 +75,21 @@ let update (input: Input) gameContent (gameTime: GameTime) gameState =
         Camera = gameState.Camera.Updated(input, time)
     }
 
-let showParameters gameContent =
+let showParameters gameContent gameState =
     let colour = Color.DarkSlateGray
 
+    let height = gameContent.SpriteFont.MeasureString("Hello").Y
+
     gameContent.SpriteBatch.Begin()
-    gameContent.SpriteBatch.DrawString(gameContent.SpriteFont, "GeoVisualise", new Vector2(0.0f, 0.0f), colour)
+
+    [
+        "GeoVisualise"
+        sprintf "LookDir X=%.3f" gameState.Camera.LookDirection.X
+        sprintf "LookDir Y=%.3f" gameState.Camera.LookDirection.Y
+        sprintf "LookDir Z=%.3f" gameState.Camera.LookDirection.Z
+    ]
+    |> List.iteri (fun i s -> gameContent.SpriteBatch.DrawString(gameContent.SpriteFont, s, new Vector2(0.0f, height * single i), colour))
+
     gameContent.SpriteBatch.End()
 
 let draw (device: GraphicsDevice) gameContent gameState (gameTime: GameTime) =
@@ -94,10 +104,13 @@ let draw (device: GraphicsDevice) gameContent gameState (gameTime: GameTime) =
     gameContent.Effect.Parameters.["xProjection"].SetValue(gameContent.Projection)
     gameContent.Effect.Parameters.["xLightDirection"].SetValue(gameContent.LightDirection)
 
+    device.BlendState <- BlendState.Opaque
+    device.DepthStencilState <- DepthStencilState.Default
+
     gameContent.Effect.CurrentTechnique.Passes |> Seq.iter
         (fun pass ->
             pass.Apply()
             device.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, gameContent.Vertices, 0, gameContent.Vertices.Length, gameContent.Indices, 0, gameContent.Indices.Length / 3)
         )
 
-    if gameState.ShowParameters then showParameters gameContent
+    if gameState.ShowParameters then showParameters gameContent gameState
