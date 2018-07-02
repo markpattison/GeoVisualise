@@ -70,7 +70,11 @@
     <Content Include="content\fonts\Arial.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="data\TL11\TL11.asc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Compile Include="ReadElevationData.fs" />
+    <Compile Include="ConvertToVertices.fs" />
     <Compile Include="Input.fs" />
     <Compile Include="Sample.fs" />
     <Compile Include="Program.fs" />

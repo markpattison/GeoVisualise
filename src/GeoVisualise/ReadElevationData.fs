@@ -49,7 +49,7 @@ let readAsc (stream: StreamReader) =
     |> Seq.iteri (fun row line ->
         let values = line.Split(' ')
         for col in 0 .. (nCols - 1) do
-            data.[row, col] <- values.[col].AsFloat())
+            data.[col, row] <- values.[col].AsFloat())
 
     {
         NumCols = nCols

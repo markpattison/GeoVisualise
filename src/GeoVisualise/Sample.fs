@@ -18,8 +18,11 @@ type Content =
     }
 
 let loadContent (_this: Game) device (graphics: GraphicsDeviceManager) =
-    let ascStream = new StreamReader(@"TL11\TL11.asc")
+    let ascStream = new StreamReader(@"data\TL11\TL11.asc")
     let data = readAsc ascStream
+    let vertices = ConvertToVertices.convert data
+    let indices = ConvertToVertices.indices data.NumCols data.NumRows
+
     {
         Effect = _this.Content.Load<Effect>("Effects/effects")
         SpriteFont = _this.Content.Load<SpriteFont>("Fonts/Arial")
