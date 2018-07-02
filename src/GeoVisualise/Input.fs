@@ -1,4 +1,4 @@
-﻿module FSharpMonogame.Input
+﻿module GeoVisualise.Input
 
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Input

@@ -1,4 +1,4 @@
-﻿namespace FSharpMonogame
+﻿namespace GeoVisualise
 
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics

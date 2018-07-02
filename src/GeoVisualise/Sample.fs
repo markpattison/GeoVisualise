@@ -1,8 +1,11 @@
-﻿module FSharpMonogame.Sample
+﻿module GeoVisualise.Sample
+
+open System.IO
 
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
 
+open ReadElevationData
 open Input
 
 type Content =
@@ -15,6 +18,8 @@ type Content =
     }
 
 let loadContent (_this: Game) device (graphics: GraphicsDeviceManager) =
+    let ascStream = new StreamReader(@"TL11\TL11.asc")
+    let data = readAsc ascStream
     {
         Effect = _this.Content.Load<Effect>("Effects/effects")
         SpriteFont = _this.Content.Load<SpriteFont>("Fonts/Arial")

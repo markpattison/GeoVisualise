@@ -1,6 +1,7 @@
 source https://www.nuget.org/api/v2
 
 nuget FSharp.Core
+nuget FSharp.Data
 nuget MonoGame.Framework.WindowsDX
 
 group Build
