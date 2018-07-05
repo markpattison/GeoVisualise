@@ -63,8 +63,8 @@ type State =
     }
 
 let initialState content =
-    let startingPosition = Vector3(0.5f * (content.MinX + content.MaxX), 0.5f * (content.MinY + content.MaxY), 5000.0f)
-    { ShowParameters = false; Exiting = false; Camera = FreeCamera(startingPosition, 0.0f, 0.0f) }
+    let startingPosition = Vector3(0.5f * (content.MinX + content.MaxX), 0.5f * (content.MinY + content.MaxY), 1000.0f)
+    { ShowParameters = false; Exiting = false; Camera = FreeCamera(startingPosition, 0.5f, 0.0f) }
 
 let update (input: Input) gameContent (gameTime: GameTime) gameState =
     let time = float32 gameTime.TotalGameTime.TotalSeconds

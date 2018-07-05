@@ -50,7 +50,7 @@ Target.create "BuildApp" (fun _ ->
 )
 
 Target.description "Running application"
-Target.create "RunApp" (fun _ ->
+Target.create "Run" (fun _ ->
     Fake.Core.Process.fireAndForget (fun info ->
         { info with
             FileName = buildDir + @"GeoVisualise.exe"
@@ -64,7 +64,7 @@ open Fake.Core.TargetOperators
 "Clean"
     ==> "BuildContent"
     ==> "BuildApp"
-    ==> "RunApp"
+    ==> "Run"
 
 // Start build
 

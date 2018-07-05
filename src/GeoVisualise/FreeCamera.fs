@@ -6,7 +6,7 @@ open Input
 
 let maxLookUpDown = 1.5f;
 let rotSpeed = 0.00005f;            // per millisecond
-let moveSpeed = 0.02f;
+let moveSpeed = 10.0f;
 let upDirection = Vector3(0.0f, 0.0f, 1.0f)
 
 // members
@@ -34,12 +34,12 @@ type FreeCamera(position: Vector3,
     member _this.RightDirection = rightDirection
     member _this.Updated(input : Input, t) =
         let mutable newPosition = position
-        if input.Left then newPosition <- newPosition - rightDirection
-        if input.Right then newPosition <- newPosition + rightDirection
-        if input.Up then newPosition <- newPosition + upDirection
-        if input.Down then newPosition <- newPosition - upDirection
-        if input.Forward then newPosition <- newPosition + lookDirection
-        if input.Backward then newPosition <- newPosition - lookDirection
+        if input.Left then newPosition <- newPosition - rightDirection * moveSpeed
+        if input.Right then newPosition <- newPosition + rightDirection * moveSpeed
+        if input.Up then newPosition <- newPosition + upDirection * moveSpeed
+        if input.Down then newPosition <- newPosition - upDirection * moveSpeed
+        if input.Forward then newPosition <- newPosition + lookDirection * moveSpeed
+        if input.Backward then newPosition <- newPosition - lookDirection * moveSpeed
         let newLookAroundZ = lookAroundZ + rotSpeed * t * single input.MouseDX
         let newLookAroundX = MathHelper.Clamp(lookAroundX + rotSpeed * t * single input.MouseDY, -maxLookUpDown, maxLookUpDown)
         FreeCamera(newPosition, newLookAroundX, newLookAroundZ)

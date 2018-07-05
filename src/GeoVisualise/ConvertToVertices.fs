@@ -54,7 +54,7 @@ let convert asc =
 
     let vertices = Array.init (nCols * nRows) (fun i ->
         VertexPositionNormalTexture(points.[i], Vector3.Normalize(normals.[i]), Vector2()))
-    vertices.[0].Position <- vertices.[0].Position + 50.0f * Vector3.UnitZ
+    
     vertices, minX, maxX, minY, maxY
 
 let indices nCols nRows =
