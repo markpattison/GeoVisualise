@@ -79,6 +79,7 @@
     <Compile Include="ReadElevationData.fs" />
     <Compile Include="ReadContourData.fs" />
     <Compile Include="ConvertToVertices.fs" />
+    <Compile Include="CreateSpotHeightVertices.fs" />
     <Compile Include="Input.fs" />
     <Compile Include="FreeCamera.fs" />
     <Compile Include="Sample.fs" />

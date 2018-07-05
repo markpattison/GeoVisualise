@@ -5,8 +5,6 @@ open System.IO
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
 
-open ReadElevationData
-open ReadContourData
 open Input
 open FreeCamera
 
@@ -28,14 +26,18 @@ type Content =
         Projection: Matrix
 
         LightDirection: Vector3
+
+        SpotHeightVertices: VertexPositionNormalTexture []
     }
 
 let loadContent (_this: Game) device (graphics: GraphicsDeviceManager) =
-    let contours = readContours @"data\TL11\TL11.gml"
     let ascStream = new StreamReader(@"data\TL11\TL11.asc")
-    let data = readAsc ascStream
+    let data = ReadElevationData.readAsc ascStream
     let vertices, minX, maxX, minY, maxY = ConvertToVertices.convert data
     let indices = ConvertToVertices.indices data.NumCols data.NumRows
+
+    let contours = ReadContourData.readContours @"data\TL11\TL11.gml"
+    let spotHeightVertices = CreateSpotHeightVertices.createVertices contours.SpotHeights
 
     {
         Effect = _this.Content.Load<Effect>("Effects/effects")
@@ -55,6 +57,8 @@ let loadContent (_this: Game) device (graphics: GraphicsDeviceManager) =
         Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, device.Viewport.AspectRatio, 1.0f, 10000.0f)
 
         LightDirection = Vector3.Normalize(Vector3(-1.0f, 0.0f, -0.5f))
+
+        SpotHeightVertices = spotHeightVertices
     }
 
 type State =
