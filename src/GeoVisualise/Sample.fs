@@ -6,6 +6,7 @@ open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
 
 open ReadElevationData
+open ReadContourData
 open Input
 open FreeCamera
 
@@ -30,6 +31,7 @@ type Content =
     }
 
 let loadContent (_this: Game) device (graphics: GraphicsDeviceManager) =
+    let contours = readContours @"data\TL11\TL11.gml"
     let ascStream = new StreamReader(@"data\TL11\TL11.asc")
     let data = readAsc ascStream
     let vertices, minX, maxX, minY, maxY = ConvertToVertices.convert data
