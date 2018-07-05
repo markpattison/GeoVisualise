@@ -103,12 +103,16 @@ let draw (device: GraphicsDevice) gameContent gameState (gameTime: GameTime) =
 
     do device.Clear(Color.LightGray)
 
-    gameContent.Effect.CurrentTechnique <- gameContent.Effect.Techniques.["Coloured"]
-
     gameContent.Effect.Parameters.["xWorld"].SetValue(gameContent.World)
     gameContent.Effect.Parameters.["xView"].SetValue(gameState.Camera.ViewMatrix)
     gameContent.Effect.Parameters.["xProjection"].SetValue(gameContent.Projection)
     gameContent.Effect.Parameters.["xLightDirection"].SetValue(gameContent.LightDirection)
+    gameContent.Effect.Parameters.["xTerrainColour"].SetValue(Color.Green.ToVector4())
+    gameContent.Effect.Parameters.["xSpotHeightColour"].SetValue(Color.Yellow.ToVector4())
+
+    // draw terrain
+
+    gameContent.Effect.CurrentTechnique <- gameContent.Effect.Techniques.["Terrain"]
 
     device.BlendState <- BlendState.Opaque
     device.DepthStencilState <- DepthStencilState.Default
@@ -117,6 +121,19 @@ let draw (device: GraphicsDevice) gameContent gameState (gameTime: GameTime) =
         (fun pass ->
             pass.Apply()
             device.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, gameContent.Vertices, 0, gameContent.Vertices.Length, gameContent.Indices, 0, gameContent.Indices.Length / 3)
+        )
+
+    // draw spot heights
+
+    gameContent.Effect.CurrentTechnique <- gameContent.Effect.Techniques.["SpotHeight"]
+
+    device.BlendState <- BlendState.Opaque
+    device.DepthStencilState <- DepthStencilState.Default
+
+    gameContent.Effect.CurrentTechnique.Passes |> Seq.iter
+        (fun pass ->
+            pass.Apply()
+            device.DrawUserPrimitives(PrimitiveType.TriangleList, gameContent.SpotHeightVertices, 0, gameContent.SpotHeightVertices.Length / 3)
         )
 
     if gameState.ShowParameters then showParameters gameContent gameState
