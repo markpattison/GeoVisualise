@@ -1,4 +1,4 @@
-﻿module GeoVisualise.CreateSpotHeightVertices
+﻿module GeoVisualise.CreateContourVertices
 
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
@@ -35,6 +35,14 @@ let createVerticesForSpotHeight spotHeight =
         VertexPositionNormalTexture(vTop, normal3, Vector2(1.0f, 0.0f))
     |]
 
-let createVertices spotHeights =
+let createSpotHeightVertices spotHeights =
     spotHeights
     |> Array.collect createVerticesForSpotHeight
+
+let createContourVertices contour =
+    contour.Points
+    |> Array.map (fun p -> VertexPosition(Vector3(single p.X, single p.Y, single contour.Height)))
+
+let createAllContourVertices contours =
+    contours
+    |> Array.map createContourVertices

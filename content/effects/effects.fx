@@ -3,6 +3,7 @@ float4x4 xView;
 float4x4 xProjection;
 float3 xLightDirection;
 float4 xTerrainColour;
+float4 xContourColour;
 float4 xSpotHeightColour;
 
 texture xTerrain;
@@ -123,6 +124,38 @@ technique TerrainTexture
 	{
 		VertexShader = compile vs_4_0 TerrainTextureVS();
 		PixelShader = compile ps_4_0 TerrainTexturePS();
+	}
+}
+
+//------- Technique: Contours --------
+
+VertexToPixel ContourVS(float4 Position : SV_POSITION)
+{
+	float4x4 preViewProjection = mul(xView, xProjection);
+	float4x4 preWorldViewProjection = mul(xWorld, preViewProjection);
+
+	VertexToPixel output;
+
+	output.Position = mul(Position, preWorldViewProjection);
+
+	return output;
+}
+
+PixelToFrame ContourPS(VertexToPixel input)
+{
+	PixelToFrame output;
+
+	output.Colour = xContourColour;
+
+	return output;
+}
+
+technique Contour
+{
+	pass Pass0
+	{
+		VertexShader = compile vs_4_0 ContourVS();
+		PixelShader = compile ps_4_0 ContourPS();
 	}
 }
 

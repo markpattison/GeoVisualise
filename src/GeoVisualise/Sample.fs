@@ -28,14 +28,15 @@ type Content =
         LightDirection: Vector3
 
         SpotHeightVertices: VertexPositionNormalTexture []
+        ContourVertices: VertexPosition [][]
 
         TerrainTexture: RenderTarget2D
 
         DrawDebug: Texture2D -> unit
     }
 
-let createTerrainTexture device (effect: Effect) (vertices: VertexPositionNormalTexture []) (indices: int []) minX maxX minY maxY =
-    let renderTarget = new RenderTarget2D(device, 800, 800, true, SurfaceFormat.Color, DepthFormat.None, 1, RenderTargetUsage.PreserveContents)
+let createTerrainTexture device (effect: Effect) (vertices: VertexPositionNormalTexture []) (indices: int []) (contourVertices: VertexPosition [][]) minX maxX minY maxY =
+    let renderTarget = new RenderTarget2D(device, 2048, 2048, true, SurfaceFormat.Color, DepthFormat.None, 1, RenderTargetUsage.PreserveContents)
     device.SetRenderTarget(renderTarget)
 
     do device.Clear(Color.Pink)
@@ -48,6 +49,7 @@ let createTerrainTexture device (effect: Effect) (vertices: VertexPositionNormal
     effect.Parameters.["xView"].SetValue(view)
     effect.Parameters.["xProjection"].SetValue(projection)
     effect.Parameters.["xTerrainColour"].SetValue(Color.Green.ToVector4())
+    effect.Parameters.["xContourColour"].SetValue(Color.Black.ToVector4())
 
     effect.CurrentTechnique <- effect.Techniques.["TerrainTexture"]
 
@@ -55,6 +57,16 @@ let createTerrainTexture device (effect: Effect) (vertices: VertexPositionNormal
         (fun pass ->
             pass.Apply()
             device.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, vertices, 0, vertices.Length, indices, 0, indices.Length / 3)
+        )
+    
+    effect.CurrentTechnique <- effect.Techniques.["Contour"]
+
+    effect.CurrentTechnique.Passes |> Seq.iter
+        (fun pass ->
+            pass.Apply()
+            contourVertices
+            |> Array.iter (fun contour ->
+                device.DrawUserPrimitives(PrimitiveType.LineStrip, contour, 0, contour.Length - 1))
         )
 
     device.SetRenderTarget(null)
@@ -91,12 +103,13 @@ let loadContent (_this: Game) device (graphics: GraphicsDeviceManager) =
     let vertices, minX, maxX, minY, maxY = ConvertToVertices.convert data
     let indices = ConvertToVertices.indices data.NumCols data.NumRows
 
-    let contours = ReadContourData.readContours @"data\TL11\TL11.gml"
-    let spotHeightVertices = CreateSpotHeightVertices.createVertices contours.SpotHeights
+    let contourData = ReadContourData.readContours @"data\TL11\TL11.gml"
+    let spotHeightVertices = CreateContourVertices.createSpotHeightVertices contourData.SpotHeights
+    let contourVertices = CreateContourVertices.createAllContourVertices contourData.Contours
 
     let effect = _this.Content.Load<Effect>("Effects/effects")
 
-    let terrainTexture = createTerrainTexture device effect vertices indices minX maxX minY maxY
+    let terrainTexture = createTerrainTexture device effect vertices indices contourVertices minX maxX minY maxY
 
     {
         Effect = effect
@@ -118,6 +131,7 @@ let loadContent (_this: Game) device (graphics: GraphicsDeviceManager) =
         LightDirection = Vector3.Normalize(Vector3(-1.0f, 0.0f, -0.5f))
 
         SpotHeightVertices = spotHeightVertices
+        ContourVertices = contourVertices
 
         TerrainTexture = terrainTexture
 

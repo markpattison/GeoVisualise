@@ -31,6 +31,7 @@ type ContoursFile =
         MaxY: float
 
         SpotHeights: SpotHeight []
+        Contours: Contour []
     }
 
 let arrayFloatStringsToTwoTuple arr =
@@ -76,7 +77,6 @@ let readContours (filepath: string) =
                          |> Array.map (fun (x, y) -> { X = x; Y = y })
             { Height = height; Points = points })
 
-
     {
         MinX = minX
         MaxX = maxX
@@ -84,4 +84,5 @@ let readContours (filepath: string) =
         MaxY = maxY
 
         SpotHeights = spotHeights
+        Contours = contours
     }
