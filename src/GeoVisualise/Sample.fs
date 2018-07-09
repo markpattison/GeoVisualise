@@ -47,7 +47,7 @@ let createTerrainTexture device (effect: Effect) (vertices: VertexPositionNormal
     effect.Parameters.["xWorld"].SetValue(world)
     effect.Parameters.["xView"].SetValue(view)
     effect.Parameters.["xProjection"].SetValue(projection)
-    effect.Parameters.["xTerrainColour"].SetValue(Color.Yellow.ToVector4())
+    effect.Parameters.["xTerrainColour"].SetValue(Color.Green.ToVector4())
 
     effect.CurrentTechnique <- effect.Techniques.["TerrainTexture"]
 

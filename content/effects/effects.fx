@@ -110,7 +110,7 @@ PixelToFrame TerrainTexturePS(VertexToPixel input)
 {
 	PixelToFrame output;
 
-	float height = (input.Normal.z - 70.0) / 90.0;
+	float height = (input.Normal.z - 0.0) / 90.0;
 
 	output.Colour = xTerrainColour * height;
 

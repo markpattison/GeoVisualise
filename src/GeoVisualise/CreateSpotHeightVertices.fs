@@ -14,10 +14,10 @@ let calculateNormal v1 v2 v3 =
     |> Vector3.Normalize
 
 let createVerticesForSpotHeight spotHeight =
-    let v1   = Vector3(single spotHeight.X, single spotHeight.Y + width, single spotHeight.Elevation + offset)
-    let v2   = Vector3(single spotHeight.X + 0.866f * width, single spotHeight.Y - 0.5f * width, single spotHeight.Elevation + offset)
-    let v3   = Vector3(single spotHeight.X - 0.866f * width, single spotHeight.Y - 0.5f * width, single spotHeight.Elevation + offset)
-    let vTop = Vector3(single spotHeight.X, single spotHeight.Y, single spotHeight.Elevation + offset + height)
+    let v1   = Vector3(single spotHeight.SpotX, single spotHeight.SpotY + width, single spotHeight.Elevation + offset)
+    let v2   = Vector3(single spotHeight.SpotX + 0.866f * width, single spotHeight.SpotY - 0.5f * width, single spotHeight.Elevation + offset)
+    let v3   = Vector3(single spotHeight.SpotX - 0.866f * width, single spotHeight.SpotY - 0.5f * width, single spotHeight.Elevation + offset)
+    let vTop = Vector3(single spotHeight.SpotX, single spotHeight.SpotY, single spotHeight.Elevation + offset + height)
 
     let normal1 = calculateNormal v1 v2 vTop
     let normal2 = calculateNormal v2 v3 vTop
