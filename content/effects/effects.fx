@@ -5,6 +5,12 @@ float3 xLightDirection;
 float4 xTerrainColour;
 float4 xSpotHeightColour;
 
+texture xTerrain;
+sampler TerrainSampler = sampler_state { texture = <xTerrain>; magfilter = LINEAR; minfilter = LINEAR; mipfilter = LINEAR; AddressU = clamp; AddressV = clamp; };
+
+texture xDebugTexture;
+sampler DebugTextureSampler = sampler_state { texture = <xDebugTexture>; magfilter = LINEAR; minfilter = LINEAR; mipfilter = LINEAR; AddressU = mirror; AddressV = mirror; };
+
 struct VertexShaderInput
 {
     float4 Position  : SV_POSITION;
@@ -16,6 +22,7 @@ struct VertexToPixel
 {
 	float4 Position  : SV_POSITION;
 	float3 Normal    : NORMAL;
+	float2 TexCoords : TEXCOORD0;
 };
 
 struct PixelToFrame
@@ -34,6 +41,7 @@ VertexToPixel TerrainVS(VertexShaderInput input)
 
 	output.Position = mul(input.Position, preWorldViewProjection);
     output.Normal = normal;
+	output.TexCoords = input.TexCoords;
 
 	return output;
 }
@@ -42,9 +50,13 @@ PixelToFrame TerrainPS(VertexToPixel input)
 {
 	PixelToFrame output;
 
-	float lightingFactor = saturate(dot(input.Normal, -xLightDirection));
+	float4 colour = tex2D(TerrainSampler, input.TexCoords);
 
-	output.Colour = xTerrainColour * (lightingFactor + 0.2);
+	float3 normal = normalize(input.Normal);
+
+	float lightingFactor = saturate(dot(normal, -xLightDirection));
+
+	output.Colour = colour * (lightingFactor + 0.2);
 
 	return output;
 }
@@ -75,5 +87,71 @@ technique SpotHeight
 	{
 		VertexShader = compile vs_4_0 TerrainVS();
 		PixelShader = compile ps_4_0 SpotHeightPS();
+	}
+}
+
+//------- Technique: TerrainTexture --------
+
+VertexToPixel TerrainTextureVS(VertexShaderInput input)
+{
+	float4x4 preViewProjection = mul(xView, xProjection);
+	float4x4 preWorldViewProjection = mul(xWorld, preViewProjection);
+
+	VertexToPixel output;
+
+	output.Position = mul(input.Position, preWorldViewProjection);
+	output.Normal.xyz = mul(input.Position, xWorld).xyz;
+	output.TexCoords = input.TexCoords;
+
+	return output;
+}
+
+PixelToFrame TerrainTexturePS(VertexToPixel input)
+{
+	PixelToFrame output;
+
+	float height = (input.Normal.z - 70.0) / 90.0;
+
+	output.Colour = xTerrainColour * height;
+
+	return output;
+}
+
+technique TerrainTexture
+{
+	pass Pass0
+	{
+		VertexShader = compile vs_4_0 TerrainTextureVS();
+		PixelShader = compile ps_4_0 TerrainTexturePS();
+	}
+}
+
+//------- Technique: Debug --------
+
+VertexToPixel DebugVS(float4 inPos : SV_POSITION, float2 inTexCoords : TEXCOORD0)
+{
+	VertexToPixel Output = (VertexToPixel)0;
+
+	Output.Position = inPos;
+	Output.TexCoords = inTexCoords;
+
+	return Output;
+}
+
+PixelToFrame DebugPS(VertexToPixel PSIn)
+{
+	PixelToFrame Output = (PixelToFrame)0;
+
+	Output.Colour = tex2D(DebugTextureSampler, PSIn.TexCoords);
+
+	return Output;
+}
+
+technique Debug
+{
+	pass Pass0
+	{
+		VertexShader = compile vs_4_0 DebugVS();
+		PixelShader = compile ps_4_0 DebugPS();
 	}
 }

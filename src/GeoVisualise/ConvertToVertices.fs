@@ -23,8 +23,10 @@ let convert asc =
 
         let xf = single col
         let yf = single (i / nCols)
-
-        Vector3(xBase + xf * cellSize, yBase + yf * cellSize, single asc.Data.[row, col]))
+        if row = nCols - 1 && col = 0 then
+            Vector3(xBase + xf * cellSize, yBase + yf * cellSize, 50.0f + single asc.Data.[row, col])
+        else
+            Vector3(xBase + xf * cellSize, yBase + yf * cellSize, single asc.Data.[row, col]))
     
     let normals : Vector3 [] = Array.zeroCreate (nCols * nRows)
 
@@ -53,7 +55,9 @@ let convert asc =
             normals.[indexTopRight] <- normals.[indexTopRight] + triangle2Normal
 
     let vertices = Array.init (nCols * nRows) (fun i ->
-        VertexPositionNormalTexture(points.[i], Vector3.Normalize(normals.[i]), Vector2()))
+        let xTex = single (i % nCols) / single (nCols - 1)
+        let yTex = single (nCols - 1 - (i / nCols)) / single (nRows - 1)
+        VertexPositionNormalTexture(points.[i], Vector3.Normalize(normals.[i]), Vector2(xTex, yTex)))
     
     vertices, minX, maxX, minY, maxY
 
