@@ -30,48 +30,8 @@ type Content =
         SpotHeightVertices: VertexPositionNormalTexture []
         ContourVertices: VertexPosition [][]
 
-        TerrainTexture: RenderTarget2D
-
         DrawDebug: Texture2D -> unit
     }
-
-let createTerrainTexture device (effect: Effect) (vertices: VertexPositionNormalTexture []) (indices: int []) (contourVertices: VertexPosition [][]) minX maxX minY maxY =
-    let renderTarget = new RenderTarget2D(device, 2048, 2048, true, SurfaceFormat.Color, DepthFormat.None, 1, RenderTargetUsage.PreserveContents)
-    device.SetRenderTarget(renderTarget)
-
-    do device.Clear(Color.Pink)
-
-    let world = Matrix.Identity
-    let view = Matrix.CreateLookAt(Vector3(0.5f * (minX + maxX), 0.5f * (minY + maxY), 10000.0f), Vector3(0.5f * (minX + maxX), 0.5f * (minY + maxY), 0.0f), Vector3.UnitY)
-    let projection = Matrix.CreateOrthographic(maxX - minX, maxY - minY, 0.0f, 10000000.0f)
-
-    effect.Parameters.["xWorld"].SetValue(world)
-    effect.Parameters.["xView"].SetValue(view)
-    effect.Parameters.["xProjection"].SetValue(projection)
-    effect.Parameters.["xTerrainColour"].SetValue(Color.Green.ToVector4())
-    effect.Parameters.["xContourColour"].SetValue(Color.Black.ToVector4())
-
-    effect.CurrentTechnique <- effect.Techniques.["TerrainTexture"]
-
-    effect.CurrentTechnique.Passes |> Seq.iter
-        (fun pass ->
-            pass.Apply()
-            device.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, vertices, 0, vertices.Length, indices, 0, indices.Length / 3)
-        )
-    
-    effect.CurrentTechnique <- effect.Techniques.["Contour"]
-
-    effect.CurrentTechnique.Passes |> Seq.iter
-        (fun pass ->
-            pass.Apply()
-            contourVertices
-            |> Array.iter (fun contour ->
-                device.DrawUserPrimitives(PrimitiveType.LineStrip, contour, 0, contour.Length - 1))
-        )
-
-    device.SetRenderTarget(null)
-    
-    renderTarget
 
 let createDebug (device: GraphicsDevice) (effect: Effect) =
     let debugVertices =
@@ -109,8 +69,6 @@ let loadContent (_this: Game) device (graphics: GraphicsDeviceManager) =
 
     let effect = _this.Content.Load<Effect>("Effects/effects")
 
-    let terrainTexture = createTerrainTexture device effect vertices indices contourVertices minX maxX minY maxY
-
     {
         Effect = effect
         SpriteFont = _this.Content.Load<SpriteFont>("Fonts/Arial")
@@ -132,8 +90,6 @@ let loadContent (_this: Game) device (graphics: GraphicsDeviceManager) =
 
         SpotHeightVertices = spotHeightVertices
         ContourVertices = contourVertices
-
-        TerrainTexture = terrainTexture
 
         DrawDebug = createDebug device effect
     }
@@ -184,8 +140,9 @@ let draw (device: GraphicsDevice) gameContent gameState (gameTime: GameTime) =
     gameContent.Effect.Parameters.["xView"].SetValue(gameState.Camera.ViewMatrix)
     gameContent.Effect.Parameters.["xProjection"].SetValue(gameContent.Projection)
     gameContent.Effect.Parameters.["xLightDirection"].SetValue(gameContent.LightDirection)
-    gameContent.Effect.Parameters.["xTerrain"].SetValue(gameContent.TerrainTexture)
     gameContent.Effect.Parameters.["xSpotHeightColour"].SetValue(Color.Yellow.ToVector4())
+    gameContent.Effect.Parameters.["xTerrainColour"].SetValue(Color.Green.ToVector4())
+    gameContent.Effect.Parameters.["xContourColour"].SetValue(Color.Black.ToVector4())
 
     // draw terrain
 
@@ -198,6 +155,23 @@ let draw (device: GraphicsDevice) gameContent gameState (gameTime: GameTime) =
         (fun pass ->
             pass.Apply()
             device.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, gameContent.Vertices, 0, gameContent.Vertices.Length, gameContent.Indices, 0, gameContent.Indices.Length / 3)
+        )
+
+    // draw contours
+
+    gameContent.Effect.CurrentTechnique <- gameContent.Effect.Techniques.["Contour"]
+
+    let rs = new RasterizerState()
+    rs.DepthBias <- 10.0f;
+
+    device.RasterizerState <- rs
+
+    gameContent.Effect.CurrentTechnique.Passes |> Seq.iter
+        (fun pass ->
+            pass.Apply()
+            gameContent.ContourVertices
+            |> Array.iter (fun contour ->
+                device.DrawUserPrimitives(PrimitiveType.LineStrip, contour, 0, contour.Length - 1))
         )
 
     // draw spot heights
@@ -213,10 +187,6 @@ let draw (device: GraphicsDevice) gameContent gameState (gameTime: GameTime) =
             device.DrawUserPrimitives(PrimitiveType.TriangleList, gameContent.SpotHeightVertices, 0, gameContent.SpotHeightVertices.Length / 3)
         )
     
-    // draw debug texture
-
-    // gameContent.DrawDebug (gameContent.TerrainTexture :> Texture2D)
-
     // draw parameters
 
     if gameState.ShowParameters then showParameters gameContent gameState
