@@ -4,6 +4,8 @@ float4x4 xProjection;
 float3 xLightDirection;
 float4 xContourColour;
 float4 xSpotHeightColour;
+float xHeightScaleMin;
+float xHeightScaleMax;
 
 texture xDebugTexture;
 sampler DebugTextureSampler = sampler_state { texture = <xDebugTexture>; magfilter = LINEAR; minfilter = LINEAR; mipfilter = LINEAR; AddressU = mirror; AddressV = mirror; };
@@ -31,6 +33,8 @@ struct PixelToFrame
 
 VertexToPixel TerrainVS(VertexShaderInput input)
 {
+	float heightScaleRange = 1.0 / (xHeightScaleMax - xHeightScaleMin);
+
 	float4x4 preViewProjection = mul(xView, xProjection);
 	float4x4 preWorldViewProjection = mul(xWorld, preViewProjection);
 
@@ -40,7 +44,7 @@ VertexToPixel TerrainVS(VertexShaderInput input)
 
 	output.Position = mul(input.Position, preWorldViewProjection);
     output.Normal = normal;
-	output.Height = (mul(input.Position, xWorld).z - 70.) / 90.0;
+	output.Height = (mul(input.Position, xWorld).z - xHeightScaleMin) * heightScaleRange;
 
 	return output;
 }

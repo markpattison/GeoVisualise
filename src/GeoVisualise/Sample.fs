@@ -22,6 +22,9 @@ type Content =
         MinY: single
         MaxY: single
 
+        MinHeight: single
+        MaxHeight: single
+
         World: Matrix
         Projection: Matrix
 
@@ -116,6 +119,9 @@ let loadContent (_this: Game) device (graphics: GraphicsDeviceManager) =
         MinY = minY
         MaxY = maxY
 
+        MinHeight = 0.0f
+        MaxHeight = 500.0f
+
         World = Matrix.Identity
         Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, device.Viewport.AspectRatio, 1.0f, 10000.0f)
 
@@ -178,6 +184,8 @@ let draw (device: GraphicsDevice) gameContent gameState (gameTime: GameTime) =
     gameContent.Effect.Parameters.["xSpotHeightColour"].SetValue(Color.Yellow.ToVector4())
     gameContent.Effect.Parameters.["xContourColour"].SetValue(Color.Black.ToVector4())
     gameContent.Effect.Parameters.["xTerrainHeightTexture"].SetValue(gameContent.TerrainHeightTexture)
+    gameContent.Effect.Parameters.["xHeightScaleMin"].SetValue(gameContent.MinHeight)
+    gameContent.Effect.Parameters.["xHeightScaleMax"].SetValue(gameContent.MaxHeight)
 
     // draw terrain
 
