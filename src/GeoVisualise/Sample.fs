@@ -68,8 +68,8 @@ let createTerrainHeightTexture device (effect: Effect) =
 
     let colours = [|
         Color.DarkGreen, 0.0f
-        Color.Green, 0.1f
-        Color.LightGreen, 0.3f
+        Color.Green, 0.2f
+        //Color.LightGreen, 0.3f
         Color.Yellow, 0.5f
         Color.Orange, 0.7f
         Color.Brown, 0.9f
